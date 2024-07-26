@@ -6,7 +6,12 @@ import { renderToDom } from "../utils/renderToDom.js";
 // Reusable function to get the cards on the DOM
 // .forEach()
 const renderCards = (array) => {
-  let refStuff = "<h1 class='text-white'>Cards Go Here!</h1>";
+  let refStuff = "";
+
+    array.forEach( (item) => {
+      refStuff += card(item);   
+});
+
   renderToDom("#cards", refStuff);
 }
 
@@ -29,16 +34,19 @@ const search = (event) => {
 // .filter() & .reduce() &.sort() - chaining
 const buttonFilter = (event) => {
   if(event.target.id.includes('free')) {
-    console.log('FREE')
+    const free = referenceList.filter(item => item.price <= 0);  //Looks through the referenceList and only returns the free items.
+    renderCards(free);
   }
   if(event.target.id.includes('cartFilter')) {
-    console.log('cartFilter')
+    const inTheCart = referenceList.filter(item => item.inCart); //Only returns items that have inCart set to true.
+    renderCards(inTheCart);
   }
   if(event.target.id.includes('books')) {
-    console.log('books!')
+    const bookworm = referenceList.filter(item => item.type.toLowerCase() === 'book'); //The toLowerCase function will convert the selected data to lowercase which allows the === 'book' condition to work. This is important so that no shennanigans will happen because of any stray capital letters in the data.
+    renderCards(bookworm);
   }
   if(event.target.id.includes('clearFilter')) {
-    console.log('clearFilter')
+    renderCards(referenceList); // No need to do anything fancy here. Woohoo!
   }
   if(event.target.id.includes('productList')) {
     let table = `<table class="table table-dark table-striped" style="width: 600px">
@@ -53,7 +61,7 @@ const buttonFilter = (event) => {
     `;
     
     productList().forEach(item => {
-      table += tableRow(item);
+      table += tableRow(item);  // Iterates through the prodcutList (see productList below) and renders a new table.
     });
 
     table += `</tbody></table>`
@@ -73,7 +81,12 @@ const cartTotal = () => {
 // RESHAPE DATA TO RENDER TO DOM
 // .map()
 const productList = () => {
-  return [{ title: "SAMPLE TITLE", price: 45.00, type: "SAMPLE TYPE" }]
+  return referenceList.map(item => ({
+    title: item.title,
+    price: item.price,
+    type: item.type}) ) // .map() will allow us to reassign the object data and return a NEW ARRAY that "fits" whatever we need it to be. In this case, it will take the data from the referenceList and place it in an order that the productList/table can use.
+
+  // return [{ title: "SAMPLE TITLE", price: 45.00, type: "SAMPLE TYPE" }]
 }
 
 
