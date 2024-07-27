@@ -19,17 +19,28 @@ const renderCards = (array) => {
 // .findIndex() & (.includes() - string method)
 const toggleCart = (event) => {
   if (event.target.id.includes("fav-btn")) {
-   console.log('Clicked Fav btn')
+   const [, id] = event.target.id.split('--'); // Looks for the '--' placed before the specific item ID and uses that to split. NOTE this will return a new array of fav btn and the ID number.
+
+   const index = referenceList.findIndex(item => item.id === Number(id)) // Takes the item ID and converts that string into an actual number.
+  
+   referenceList[index].inCart = !referenceList[index].inCart // Swaps the value of 'inCart' when clicked on.
+   cartTotal();
+   renderCards(referenceList)
   }
 }
 
 // SEARCH
 // .filter()
-const search = (event) => {
-  const eventLC = event.target.value.toLowerCase();
-  console.log(eventLC)
-}
+const search = (event) => { //This particular event is set to occur when the user releases a key (keyup).
+  const eventLC = event.target.value.toLowerCase(); //Takes the VALUE of the user's search lowercase.
+  const searchResult = referenceList.filter(item =>  //Looks for the relevant search categories (author, description, title) and converts them to lowercase to match the search function. It then looks for matching results in each category.
+    item.author.toLowerCase().includes(eventLC) || 
+    item.description.toLowerCase().includes(eventLC) ||
+    item.title.toLowerCase().includes(eventLC)
+  )
 
+  renderCards(searchResult);
+}
 // BUTTON FILTER
 // .filter() & .reduce() &.sort() - chaining
 const buttonFilter = (event) => {
@@ -60,7 +71,7 @@ const buttonFilter = (event) => {
     <tbody>
     `;
     
-    productList().forEach(item => {
+    productList().sort((a, b) => a.type.localeCompare(b.type)).forEach(item => { // Sorts the product list into alphabetical order, the localeCompare will make it so we don't have to convert them to lowercase.
       table += tableRow(item);  // Iterates through the prodcutList (see productList below) and renders a new table.
     });
 
@@ -74,8 +85,16 @@ const buttonFilter = (event) => {
 // CALCULATE CART TOTAL
 // .reduce() & .some()
 const cartTotal = () => {
-  const total = 0
+  const cart = referenceList.filter(item => item.inCart); // Looks through all the items currently in the cart.
+  const total = cart.reduce((firstValue, secondValue) => firstValue + secondValue.price, 0); // This .reduce() will add the firstValue to the current secondValue continuously until there is only one number value left. (Ex. 1 + 2 + 3 + 4 would become 1 + 2 = 3, 3 + 3 = 6, 6 + 4 = 10). In this case, it will total the cost of all the items in the cart. The 0 after secondValue.price is the inital value.
+  const free = cart.some(item => item.price <= 0); // .some() will return a true or false value depnding on a condition passed through it. In this case, whether or not the item has a price of 0 or less.
   document.querySelector("#cartTotal").innerHTML = total.toFixed(2);
+
+  if (free) { // Checks if there are any free items in the cart, if so-- display some text underneath the shopping cart.
+  document.querySelector('#includes-free').innerHTML = 'INCLUDES FREE ITEMS'  
+  } else {
+    document.querySelector('#includes-free').innerHTML = ''
+  }
 }
 
 // RESHAPE DATA TO RENDER TO DOM
